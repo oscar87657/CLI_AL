@@ -105,16 +105,3 @@ class HistoryDetail(BaseModel):
 class ParseResponse(BaseModel):
     text: str = Field(description="Document Parse가 추출한 Markdown 본문")
     char_count: int
-
-
-class LawTermResult(BaseModel):
-    term_name: str = Field(description="법령 용어명")
-    definition: str = Field(description="용어 풀이")
-    law_name: str = Field(description="출처 법령명")
-    article: str | None = Field(default=None, description="관련 조문")
-
-
-class LawSearchResponse(BaseModel):
-    query: str = Field(description="검색어")
-    total: int = Field(description="전체 결과 수")
-    results: list[LawTermResult]
