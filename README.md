@@ -89,7 +89,7 @@ This repository organizes the source code, documentation, and deliverables for T
 <br><a name="algorithm-concepts-applied"></a>
 ## 🧠 Algorithm Concepts Applied
 
-All five concepts are implemented in [`Backend/app/services/algorithms.py`](Backend/app/services/algorithms.py) and called from [`Backend/app/services/rewrite_service.py`](Backend/app/services/rewrite_service.py) as part of the `/rewrite` response pipeline.
+All seven concepts are implemented in [`backend/app/services/algorithms.py`](backend/app/services/algorithms.py) and called from [`backend/app/services/rewrite_service.py`](backend/app/services/rewrite_service.py) (Hash Table · Merge Sort · Counting Sort · LCS · BFS) or [`backend/app/rag/retriever.py`](backend/app/rag/retriever.py) (Randomized Selection · LSD Radix Sort) as part of the `/rewrite` response pipeline.
 
 | Concept | CLRS | Where it is used | Complexity | Notes |
 |:--------|:----:|:-----------------|:----------:|:------|
@@ -98,11 +98,13 @@ All five concepts are implemented in [`Backend/app/services/algorithms.py`](Back
 | **Counting Sort** | Ch. 8.2 | `counting_sort_checklist` in `algorithms.py`; called in `rewrite_service.py` after checklist parsing | Θ(n + k), k = 3 | Sorts checklist items by priority (high → medium → low). k is bounded at 3, so this runs in linear time. Stable: items with the same priority keep their LLM-output order. |
 | **Dynamic Programming — LCS** | Ch. 15.4 | `lcs_word_ratio` in `algorithms.py`; called in `rewrite_service.py` after the LLM rewrite | O(mn) time, O(n) space | Word-tokenised LCS between the original document and the plain-Korean rewrite. Normalised to [0, 1] as `LCS_length / max(|original|, |rewrite|)`. Returned as `preservation_ratio` in the API response alongside the Upstage Groundedness label, giving a purely local, deterministic measure of content fidelity. Space-optimised to two rolling rows instead of the full O(mn) table. |
 | **Graph — BFS** | Ch. 22.1–22.2 | `build_term_graph` + `bfs_related_terms` in `algorithms.py`; called in `rewrite_service.py` after glossary is finalised | O(V + E) | Builds a directed adjacency list where an edge A → B exists when term B appears in the definition of term A (i.e., understanding A requires knowing B). BFS from each term discovers all transitively related terms. Results are attached to each `GlossaryTerm` as `related_terms` in the API response. |
+| **Randomized Selection** | Ch. 9.2 | `top_n_by_score` in `algorithms.py`; called in `rag/retriever.py` during vector search to select top-N candidates | O(n) expected | Iterative QuickSelect — pivot chosen uniformly at random (CLRS 7.3). Avoids a full O(n log n) sort when only the top-N RAG chunks by vector score are needed; only the selected N elements are sorted afterwards. |
+| **LSD Radix Sort** | Ch. 8.3 | `radix_sort_by_score_desc` in `algorithms.py`; called in `rag/retriever.py` for keyword and hybrid search ranking | Θ(d·(n+b)), b=10 | Float combined scores in [0, 1] are scaled to integers (×10,000) so LSD radix sort applies. Stable: equal scores preserve original relative order. Used to rank RAG candidates by combined vector+LCS score before returning to the rewrite pipeline. |
 
 <br><a name="rewrite-pipeline"></a>
 ## 🔁 Rewrite Pipeline
 
-`POST /rewrite` calls Upstage Solar three times in series, then post-processes the structured fields with the CLRS algorithms:
+`POST /rewrite` calls Upstage Solar four times in series, then post-processes the structured fields with the CLRS algorithms:
 
 1. **Call 0 — Relevance Check** ([`llm/prompts/relevance_check_v1.md`](llm/prompts/relevance_check_v1.md))
    Classifies whether the input is an administrative document / public notice / 약관 / 계약서. If `is_relevant: false`, the service short-circuits with a guidance message and **skips history persistence** so unrelated text never pollutes the history list.
@@ -113,7 +115,10 @@ All five concepts are implemented in [`Backend/app/services/algorithms.py`](Back
 3. **Call 2 — Structured Extraction** ([`llm/prompts/analysis_v1.md`](llm/prompts/analysis_v1.md))
    Given the original + rewrite, Solar extracts the glossary, key-info cards, and checklist as a single JSON response.
 
-After the three calls:
+4. **Call 3 — Summary Generation**
+   A short auxiliary Solar call (`chat_text`) condenses the rewrite into a single sentence (≤30 chars) for the history list preview.
+
+After the four calls:
 - Upstage **Groundedness Check** scores the rewrite against the original; we surface the label + a coloured badge.
 - The CLRS algorithms post-process the structured fields (see [Algorithm Concepts Applied](#algorithm-concepts-applied)).
 - The CLRS DP-LCS yields a deterministic `preservation_ratio` alongside Groundedness.
@@ -143,7 +148,8 @@ Rate limit: 10 requests / minute / IP (`RateLimiter` in [`backend/app/services/r
 | Frontend | Next.js 15 (App Router, React 19) + Tailwind CSS |
 | Backend | FastAPI + uvicorn (Python 3.11) |
 | Database / Auth | Supabase (Postgres, free plan) |
-| LLM | Upstage Solar Pro 2 (rewrite, glossary, key-info), Document Parse, Groundedness Check |
+| LLM | Upstage Solar Pro 2 — `relevance_check_v1` (관련성 판별), `rewrite_v2` (재작성·인용), `analysis_v1` (용어·핵심정보·체크리스트), summary (인라인), Document Parse, Groundedness Check |
+| RAG | 법제처 알기쉬운법령정비기준 10판 seed (322 entries — term 196 + sentence 126); seed 청크 임베딩 없음 (keyword-only fallback), 사용자 문서는 요청마다 임베딩 후 hybrid search 활성화 |
 | External APIs | 국가법령정보센터 Open API (legal term lookup via `GET /law/term`) |
 | Frontend hosting | Vercel (Hobby plan) |
 | Backend hosting | Render (free plan, Singapore) |
@@ -214,12 +220,12 @@ CLI_AL/
 │   ├── app/             layout.tsx · page.tsx (landing) · convert/page.tsx · history/page.tsx
 │   ├── components/      Dropzone · RewriteText · CitationsPanel · KeyInfoCards · GlossaryList ·
 │   │                    Checklist · ResultActions · AccessibilityBar · DisclaimerModal · …
-│   ├── lib/             api.ts (FastAPI client) · useScrollSnap.ts · Bionic.tsx · dyslexiaBionic.ts
+│   ├── lib/             api.ts (FastAPI client) · useScrollSnap.ts · Bionic.tsx · dyslexiaBionic.ts · cn.ts
 │   └── package.json
 ├── llm/
-│   ├── prompts/         relevance_check_v1 · rewrite_v2 · analysis_v1
-│   └── corpus/          rag_seed.jsonl — 법제처 어려운 표현 정비 사례 (RAG seed)
-├── supabase/migrations/ 0001_init.sql (documents · rewrites · glossary_cache + RLS policies)
+│   ├── prompts/         Versioned prompt templates (rewrite_v2 · analysis_v1 · relevance_check_v1)
+│   └── corpus/          RAG seed data (rag_seed.jsonl — 322 법제처 정비 사례, keyword-only)
+├── supabase/migrations/ 0001_init.sql (documents · rewrites · glossary_cache)
 ├── infra/               Makefile + dev.ps1 for local two-server bring-up
 ├── docs/                SETUP.md (local dev) · DEPLOY.md (production)
 ├── .github/             CODEOWNERS
