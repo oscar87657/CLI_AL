@@ -116,7 +116,7 @@ All seven concepts are implemented in [`backend/app/services/algorithms.py`](bac
    Given the original + rewrite, Solar extracts the glossary, key-info cards, and checklist as a single JSON response.
 
 4. **Call 3 — Summary Generation**
-   A short auxiliary Solar call (`chat_text`) condenses the rewrite into a single sentence (≤30 chars) for the history list preview.
+   A short auxiliary Solar call (`chat_text`) condenses the rewrite into a single sentence (~30 chars; hard-capped at 60) for the history list preview.
 
 After the four calls:
 - Upstage **Groundedness Check** scores the rewrite against the original; we surface the label + a coloured badge.
