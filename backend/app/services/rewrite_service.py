@@ -1,13 +1,18 @@
 """Orchestration for the /rewrite endpoint.
 
-Two-call rewrite pipeline
---------------------------
-Call 1  rewrite_v2   — focused rewrite + citations only.
-                       RAG context (up to 3 related chunks) is injected
-                       into the user message before this call.
-Call 2  analysis_v1  — glossary + key_info + checklist.
-                       Receives both original text AND the rewrite result
-                       so glossary definitions match the rewrite's wording.
+Four-call rewrite pipeline
+---------------------------
+Call 0  relevance_check_v1 — classifies whether the input is an administrative
+                              document. Short-circuits with a guidance message
+                              if is_relevant=false; result is never persisted.
+Call 1  rewrite_v2          — focused rewrite + citations only.
+                              RAG context (up to 3 related chunks) is injected
+                              into the user message before this call.
+Call 2  analysis_v1         — glossary + key_info + checklist.
+                              Receives both original text AND the rewrite result
+                              so glossary definitions match the rewrite's wording.
+Call 3  summary (inline)    — condenses the rewrite into a single sentence
+                              (≤30 chars) for the history list preview.
 
 RAG flow
 --------

@@ -150,7 +150,6 @@ Rate limit: 10 requests / minute / IP (`RateLimiter` in [`backend/app/services/r
 | Database / Auth | Supabase (Postgres, free plan) |
 | LLM | Upstage Solar Pro 2 — `relevance_check_v1` (관련성 판별), `rewrite_v2` (재작성·인용), `analysis_v1` (용어·핵심정보·체크리스트), summary (인라인), Document Parse, Groundedness Check |
 | RAG | 법제처 알기쉬운법령정비기준 10판 seed (322 entries — term 196 + sentence 126); seed 청크 임베딩 없음 (keyword-only fallback), 사용자 문서는 요청마다 임베딩 후 hybrid search 활성화 |
-| External APIs | 국가법령정보센터 Open API (legal term lookup via `GET /law/term`) |
 | Frontend hosting | Vercel (Hobby plan) |
 | Backend hosting | Render (free plan, Singapore) |
 | Cold-start mitigation | External cron pinger (cron-job.org, every 5 min) on `/health` |
@@ -165,13 +164,12 @@ Backend (FastAPI). Production base URL: `https://cli-al-backend.onrender.com`.
 
 | Method | Path | Purpose |
 |:------:|:-----|:--------|
-| GET | `/health` | Health probe. Returns `{status, upstage_configured, supabase_configured, law_configured, model}` so deploy gates can verify env wiring. |
+| GET | `/health` | Health probe. Returns `{status, upstage_configured, supabase_configured, model}` so deploy gates can verify env wiring. |
 | POST | `/parse` | File → text. `multipart/form-data` (PDF · TXT · DOCX · HWPX, ≤10MB). |
 | POST | `/rewrite` | Main entry. Body `{text, save_history}` → `RewriteResponse` (rewrite + citations + glossary + key_info + checklist + groundedness + preservation_ratio + summary + relevance + document_id). Rate-limited 10/min. |
 | GET | `/history?limit=N` | Most recent rewrites (max 100), with previews. |
 | GET | `/history/{rewrite_id}` | Full restore payload for a single rewrite (used by `/convert?id=...`). |
 | DELETE | `/history/{rewrite_id}` | Deletes the parent `documents` row (cascades to `rewrites`). |
-| GET | `/law/term?q=...` | (Optional) 국가법령정보센터 OPEN API passthrough. Returns 503 if `LAW_API_KEY` is unset. |
 
 <br><a name="database-schema"></a>
 ## 🗄 Database Schema (Supabase / Postgres)
@@ -193,7 +191,6 @@ RLS is on for all three. Anonymous **read** is allowed (history page reads direc
 | backend | `SUPABASE_URL`, `SUPABASE_SECRET_KEY` | ✅ | Backend persistence (bypasses RLS) |
 | backend | `CORS_ALLOW_ORIGINS` | ✅ | Comma-separated allowed frontend origins |
 | backend | `SOLAR_MODEL` | ⬜ | Override the Upstage model id |
-| backend | `LAW_API_KEY` | ⬜ | 국가법령정보센터 OPEN API key (enables `/law/term`) |
 | frontend | `NEXT_PUBLIC_API_BASE_URL` | ✅ | Backend base URL (e.g. `http://localhost:8000`) |
 | frontend | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | ⬜ | Browser-safe Supabase access (read-only) |
 
@@ -207,11 +204,11 @@ CLI_AL/
 ├── backend/             FastAPI app (uvicorn entry: app.main:app)
 │   ├── app/
 │   │   ├── main.py      App factory + CORS
-│   │   ├── config.py    pydantic-settings (UPSTAGE_*, SUPABASE_*, CORS_*, LAW_API_KEY)
+│   │   ├── config.py    pydantic-settings (UPSTAGE_*, SUPABASE_*, CORS_*)
 │   │   ├── models/      pydantic schemas (RewriteRequest/Response, RelevanceResult, …)
-│   │   ├── routers/     /health · /parse · /rewrite · /history · /law
+│   │   ├── routers/     /health · /parse · /rewrite · /history
 │   │   ├── services/    upstage_client · supabase_client · rewrite_service · history_service ·
-│   │   │                law_client · algorithms · prompt_loader · rate_limit · cache_service
+│   │   │                algorithms · prompt_loader · rate_limit · cache_service
 │   │   └── rag/         Hybrid RAG (store · indexer · retriever · db) over llm/corpus
 │   ├── tests/           pytest (test_health · test_prompt_loader)
 │   ├── scripts/         build_rag_seed.py — RAG seed builder
