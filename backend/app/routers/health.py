@@ -14,6 +14,5 @@ def health() -> dict[str, object]:
         "status": "ok",
         "upstage_configured": bool(s.upstage_api_key),
         "supabase_configured": bool(s.supabase_url and s.supabase_secret_key),
-        "law_configured": s.law_api_configured,
         "model": s.solar_model,
     }

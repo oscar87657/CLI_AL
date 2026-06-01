@@ -51,6 +51,8 @@ def save_rewrite(original_text: str, response: RewriteResponse) -> str | None:
             }
         ).execute()
         return str(document_id)
+    # TODO: 완전한 원자성을 위해서는 Supabase RPC로 전환 필요
+    # 현재는 rewrites 실패 시 documents를 수동 삭제하는 보상 트랜잭션으로 처리
     except Exception as e:  # noqa: BLE001 — persistence failure shouldn't block response
         logger.warning("save_rewrite failed: %s", e)
         if document_id:

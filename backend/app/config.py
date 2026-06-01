@@ -28,12 +28,6 @@ class Settings(BaseSettings):
     solar_llm_timeout: float = Field(default=60.0, alias="SOLAR_LLM_TIMEOUT")
     groundedness_threshold: float = Field(default=0.7, alias="GROUNDEDNESS_THRESHOLD")
 
-    law_api_key: str = Field(default="", alias="LAW_API_KEY")
-
-    @property
-    def law_api_configured(self) -> bool:
-        return bool(self.law_api_key)
-
     @property
     def cors_origins_list(self) -> list[str]:
         return [o.strip() for o in self.cors_allow_origins.split(",") if o.strip()]

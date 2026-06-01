@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
-from app.routers import health, history, law, parse, rewrite
+from app.routers import health, history, parse, rewrite
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 
@@ -31,7 +31,6 @@ def create_app() -> FastAPI:
     app.include_router(parse.router)
     app.include_router(rewrite.router)
     app.include_router(history.router)
-    app.include_router(law.router)
     return app
 
 
