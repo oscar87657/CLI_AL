@@ -149,7 +149,7 @@ Rate limit: 10 requests / minute / IP (`RateLimiter` in [`backend/app/services/r
 | Frontend | Next.js 15 (App Router, React 19) + Tailwind CSS |
 | Backend | FastAPI + uvicorn (Python 3.11) |
 | Database / Auth | Supabase (Postgres, free plan) |
-| LLM | Upstage Solar Pro 2 — `relevance_check_v1` (관련성 판별), `rewrite_v2` (재작성·인용), `analysis_v1` (용어·핵심정보·체크리스트), summary (인라인), Document Parse, Groundedness Check |
+| LLM | Upstage Solar Pro 3 — `relevance_check_v1` (관련성 판별), `rewrite_v2` (재작성·인용), `analysis_v1` (용어·핵심정보·체크리스트), summary (인라인), Document Parse, Groundedness Check |
 | RAG | 법제처 알기쉬운법령정비기준 10판 seed (322 entries — term 196 + sentence 126); seed 청크 임베딩 없음 (keyword-only fallback), 사용자 문서는 요청마다 임베딩 후 hybrid search 활성화 |
 | Frontend hosting | Vercel (Hobby plan) |
 | Backend hosting | Render (free plan, Singapore) |
@@ -188,7 +188,7 @@ RLS is on for all three. Anonymous **read** is allowed (history page reads direc
 
 | Scope | Variable | Required | Purpose |
 |:-----:|:---------|:--------:|:--------|
-| backend | `UPSTAGE_API_KEY` | ✅ | Solar Pro 2 · Document Parse · Groundedness Check |
+| backend | `UPSTAGE_API_KEY` | ✅ | Solar Pro 3 · Document Parse · Groundedness Check |
 | backend | `SUPABASE_URL`, `SUPABASE_SECRET_KEY` | ✅ | Backend persistence (bypasses RLS) |
 | backend | `CORS_ALLOW_ORIGINS` | ✅ | Comma-separated allowed frontend origins |
 | backend | `SOLAR_MODEL` | ⬜ | Override the Upstage model id |
@@ -221,7 +221,7 @@ cd CLI_AL
 
 | Service | Where | What you need |
 |:--------|:------|:--------------|
-| **Upstage** (Solar Pro 2 · Document Parse · Groundedness) | [console.upstage.ai](https://console.upstage.ai) → API Keys | `UPSTAGE_API_KEY` (`up_xxx…`) |
+| **Upstage** (Solar Pro 3 · Document Parse · Groundedness) | [console.upstage.ai](https://console.upstage.ai) → API Keys | `UPSTAGE_API_KEY` (`up_xxx…`) |
 | **Supabase** (Postgres) | [supabase.com](https://supabase.com) → Project Settings → API Keys | `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` |
 
 Apply for free Upstage credits via the [AI Initiative 2025](https://www.upstage.ai/events/ai-initiative-2025-ko) program.

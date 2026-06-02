@@ -11,9 +11,9 @@ This document describes the live deployment of CLI_AL. **Read this before changi
 | Frontend  | https://cli-al.vercel.app | Vercel (Hobby — free) |
 | Backend   | https://cli-al-backend.onrender.com | Render (free plan, Singapore) |
 | Database / Auth | Supabase project `cli-al` | Supabase free |
-| LLM       | Upstage Solar Pro 2 | Upstage cloud |
+| LLM       | Upstage Solar Pro 3 | Upstage cloud |
 
-Health endpoint: `https://cli-al-backend.onrender.com/health` — should return `{"status":"ok","upstage_configured":true,"supabase_configured":true,"law_configured":true,"model":"solar-pro2"}`. `law_configured` is `true` only when `LAW_API_KEY` is set (see §3.1); without it the rest of the service still works but `GET /law/term` returns 503.
+Health endpoint: `https://cli-al-backend.onrender.com/health` — should return `{"status":"ok","upstage_configured":true,"supabase_configured":true,"model":"solar-pro3"}`.
 
 ---
 
@@ -47,7 +47,6 @@ Set in Render dashboard → service `cli-al-backend` → **Environment**. All ma
 | `SUPABASE_URL` | `https://xxx.supabase.co` | Project URL |
 | `SUPABASE_SECRET_KEY` | `sb_secret_…` | Server-side, bypasses RLS — **never** expose to FE |
 | `CORS_ALLOW_ORIGINS` | `https://cli-al.vercel.app` | Comma-separated list of allowed FE origins |
-| `LAW_API_KEY` | OC key from open.law.go.kr | Optional. Enables `GET /law/term` (국가법령정보센터 lookup). Missing → endpoint returns 503; rest of service unaffected. |
 
 ### 3.2 Vercel (frontend)
 Set in Vercel dashboard → project → **Settings → Environment Variables**.
@@ -86,7 +85,7 @@ These files and identifiers are wired into the live deployment. Changing them wi
 |------|------------------|
 | `render.yaml` — `rootDir`, `startCommand`, `healthCheckPath` | Render service |
 | `/health` endpoint path in `backend/app/routers/health.py` | Render health check + external cron pinger |
-| Env var **names** in `backend/app/config.py` (`UPSTAGE_API_KEY`, `SUPABASE_*`, `CORS_ALLOW_ORIGINS`, `LAW_API_KEY`) | Render dashboard values |
+| Env var **names** in `backend/app/config.py` (`UPSTAGE_API_KEY`, `SUPABASE_*`, `CORS_ALLOW_ORIGINS`) | Render dashboard values |
 | Env var **names** in `frontend/lib/api.ts` (`NEXT_PUBLIC_API_BASE_URL`) | Vercel dashboard values |
 | Backend URL registered at cron-job.org | External keepalive pinger (see §4) |
 

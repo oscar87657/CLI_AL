@@ -24,7 +24,7 @@ go to Upstage cloud.
 
 ## 1. Get API credentials
 
-### Upstage (Solar Pro, Document Parse, Embedding, Groundedness Check)
+### Upstage (Solar Pro 3, Document Parse, Embedding, Groundedness Check)
 
 1. Sign up at https://console.upstage.ai
 2. Sidebar → **API Keys** → **Create new secret key**
@@ -41,13 +41,6 @@ go to Upstage cloud.
    - `Project URL` (e.g. `https://abc.supabase.co`)
    - `Publishable key`  (`sb_publishable_…`) — browser-safe
    - `Secret key`       (`sb_secret_…`)      — server-only, bypasses RLS
-
-### 국가법령정보센터 Open API (optional — for `GET /law/term`)
-
-1. Sign up at https://open.law.go.kr → **OPEN API** → **API 신청**
-2. Approval is usually within 1 business day; copy your **OC (Open API Client)** key.
-3. Without this key, `/law/term` returns `503` but the rest of the service (rewrite, glossary, history)
-   continues to work normally — the law lookup is an auxiliary feature.
 
 ---
 
@@ -130,11 +123,7 @@ pwsh ./infra/dev.ps1 frontend
    - A coloured groundedness badge top-right
 4. Open http://localhost:3000/history — the just-saved entry should appear.
 5. Hit http://localhost:8000/health to confirm config flags are `true` for
-   Upstage and Supabase. `law_configured` is `true` only if you completed the
-   optional law-API step above; `false` otherwise (the rest still works).
-6. (Optional) Hit http://localhost:8000/law/term?q=임차인 — if `LAW_API_KEY` is
-   set, you should get a JSON list of legal-term definitions from
-   국가법령정보센터. Without the key, this returns `503`.
+   Upstage and Supabase.
 
 ---
 
@@ -147,4 +136,4 @@ pwsh ./infra/dev.ps1 frontend
 | `이력 불러오기 실패`                              | Supabase isn't configured **or** RLS policy blocks it — re-run `0001_init.sql`.                |
 | `connect ECONNREFUSED 127.0.0.1:8000`              | Backend isn't running, or `NEXT_PUBLIC_API_BASE_URL` points to the wrong host.                 |
 | Tailwind classes look unstyled                     | First run: `cd frontend && npm install` then restart `npm run dev`.                            |
-| Solar returns Korean refusal text                  | Input matched the injection / advisory guard — adjust `llm/prompts/rewrite_v1.md` if too strict. |
+| Solar returns Korean refusal text                  | Input matched the injection / advisory guard — adjust `llm/prompts/rewrite_v2.md` if too strict. |

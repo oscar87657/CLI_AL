@@ -23,7 +23,7 @@ class Settings(BaseSettings):
 
     disable_rate_limit: bool = Field(default=False, alias="DISABLE_RATE_LIMIT")
 
-    solar_model: str = Field(default="solar-pro2", alias="SOLAR_MODEL")
+    solar_model: str = Field(default="solar-pro3", alias="SOLAR_MODEL")
     solar_temperature: float = Field(default=0.2, alias="SOLAR_TEMPERATURE")
     solar_llm_timeout: float = Field(default=60.0, alias="SOLAR_LLM_TIMEOUT")
     groundedness_threshold: float = Field(default=0.7, alias="GROUNDEDNESS_THRESHOLD")

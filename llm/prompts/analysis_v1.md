@@ -1,6 +1,6 @@
 # 분석 프롬프트 v1 (용어 풀이 · 핵심정보 · 체크리스트 전용)
 
-`solar-pro2` / `solar-pro3` 모델용. 원문과 재작성 결과를 함께 받아
+`solar-pro3` 모델용. 원문과 재작성 결과를 함께 받아
 `glossary` / `key_info` / `checklist`만 반환.
 
 ---
