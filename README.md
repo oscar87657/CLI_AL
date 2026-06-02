@@ -21,6 +21,7 @@ This repository hosts **Team CLI**'s term-project for the Spring 2026 Algorithms
 - [API Endpoints](#api-endpoints)
 - [Database Schema](#database-schema)
 - [Environment Variables](#environment-variables)
+- [Setup & Run](#setup--run)
 - [Repository Structure](#repository-structure)
 - [Testing](#testing)
 - [Deliverables](#deliverables)
@@ -195,6 +196,103 @@ RLS is on for all three. Anonymous **read** is allowed (history page reads direc
 | frontend | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | ⬜ | Browser-safe Supabase access (read-only) |
 
 See [`docs/SETUP.md`](docs/SETUP.md) for full local setup; [`docs/DEPLOY.md`](docs/DEPLOY.md) for Vercel/Render production configuration.
+
+<br><a name="setup--run"></a>
+## 🚀 Setup & Run
+
+> Full instructions are in [`docs/SETUP.md`](docs/SETUP.md). This section summarises the minimal steps to run the project locally.
+
+### Prerequisites
+
+| Tool | Version |
+|:-----|:--------|
+| Python | 3.11+ |
+| Node.js | 20+ |
+| npm | 10+ (bundled with Node) |
+
+### 1. Clone
+
+```bash
+git clone https://github.com/Choroning/CLI_AL.git
+cd CLI_AL
+```
+
+### 2. Get API credentials
+
+| Service | Where | What you need |
+|:--------|:------|:--------------|
+| **Upstage** (Solar Pro 2 · Document Parse · Groundedness) | [console.upstage.ai](https://console.upstage.ai) → API Keys | `UPSTAGE_API_KEY` (`up_xxx…`) |
+| **Supabase** (Postgres) | [supabase.com](https://supabase.com) → Project Settings → API Keys | `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` |
+
+Apply for free Upstage credits via the [AI Initiative 2025](https://www.upstage.ai/events/ai-initiative-2025-ko) program.
+
+### 3. Apply the database schema
+
+In the **Supabase Dashboard → SQL Editor**, paste and run the contents of [`supabase/migrations/0001_init.sql`](supabase/migrations/0001_init.sql). This creates the `documents`, `rewrites`, and `glossary_cache` tables with RLS policies.
+
+### 4. Configure environment files
+
+```bash
+cp backend/.env.example  backend/.env
+cp frontend/.env.example frontend/.env.local
+```
+
+Fill in `backend/.env`:
+
+```env
+UPSTAGE_API_KEY=up_xxx…
+SUPABASE_URL=https://<project>.supabase.co
+SUPABASE_SECRET_KEY=sb_secret_…
+CORS_ALLOW_ORIGINS=http://localhost:3000
+```
+
+Fill in `frontend/.env.local`:
+
+```env
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+NEXT_PUBLIC_SUPABASE_URL=https://<project>.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_…
+```
+
+### 5. Install dependencies & run
+
+**macOS / Linux**
+
+```bash
+cd infra && make install   # installs backend + frontend deps
+make -j2 dev               # backend :8000 · frontend :3000
+```
+
+**Windows (PowerShell)**
+
+```powershell
+pwsh ./infra/dev.ps1 install   # installs backend + frontend deps
+pwsh ./infra/dev.ps1           # spawns two terminals (backend :8000 · frontend :3000)
+```
+
+Or start each server manually:
+
+```bash
+# Terminal 1 — backend
+cd backend
+pip install -e ".[dev]"
+uvicorn app.main:app --reload --port 8000
+
+# Terminal 2 — frontend
+cd frontend
+npm install
+npm run dev          # → http://localhost:3000
+```
+
+### 6. Verify
+
+| URL | Expected |
+|:----|:---------|
+| `http://localhost:3000` | Landing page loads |
+| `http://localhost:8000/health` | `{"status":"ok","upstage_configured":true,"supabase_configured":true}` |
+| `http://localhost:3000/history` | History list (empty on first run) |
+
+Paste or upload an administrative document (lease clause, public notice, etc.) on the convert page and click **쉬운말로 변환** — the rewrite, glossary, key-info cards, and groundedness badge should appear within ~5–15 s.
 
 <br><a name="repository-structure"></a>
 ## 🗂 Repository Structure
