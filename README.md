@@ -5,7 +5,6 @@
 
 This repository hosts **Team CLI**'s term-project for the Spring 2026 Algorithms course at Korea University Sejong — a web-based LLM application powered by **Upstage Solar**, with a **Frontend + Backend** architecture, that intentionally applies algorithm concepts learned in the course.
 
-*Team CLI — Korea University Sejong, Department of Computer Science and Software Engineering — Spring 2026*
 <br><br>
 
 ## 📑 Table of Contents
