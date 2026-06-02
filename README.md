@@ -3,9 +3,8 @@
 ![Last Commit](https://img.shields.io/github/last-commit/Choroning/CLI_AL)
 ![Languages](https://img.shields.io/github/languages/top/Choroning/CLI_AL)
 
-This repository hosts **Team CLI**'s completed term-project for the Spring 2026 Algorithms course at Korea University Sejong — **행정문서 쉬운말 변환기**, a web app powered by **Upstage Solar** that rewrites administrative documents into plain Korean, intentionally applying CLRS algorithm concepts from the course.
+This repository hosts **Team CLI**'s term-project for the Spring 2026 Algorithms course at Korea University Sejong, a web app powered by **Upstage Solar Pro 3** that rewrites administrative documents into plain Korean, intentionally applying CLRS algorithm concepts from the course.
 
-*Team CLI — Korea University Sejong, Dept. of Computer Science & Software Engineering · Spring 2026*
 
 <br>
 
