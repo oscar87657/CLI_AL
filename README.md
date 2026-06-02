@@ -64,8 +64,8 @@ This repository holds the source code, documentation, and final deliverables of 
 | Role | Name |
 |:-----|:-----|
 | Project Manager | Park Cheolwon |
-| Frontend | Song Minseong |
-| Backend | Kang Seonguk |
+| Frontend | Song Minsung |
+| Backend | Kang Seongwook |
 | LLM / Prompt Engineering | Kwak Jun |
 
 <br><a name="project-overview"></a>
